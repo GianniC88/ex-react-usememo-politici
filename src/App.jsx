@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 
 function App() {
   const [politici, setPolitici] = useState([]);
+  const [cerca, setCerca] = useState("")
 
   useEffect(() => {
     fetch("http://localhost:3333/politicians")
@@ -9,13 +10,28 @@ function App() {
       .then(data => setPolitici(data))
       .catch(error => console.error(error))
   }, [])
-  console.log(politici)
+
+
+  const politiciFiltrati = useMemo(() => {
+    return politici.filter(politico => {
+      const nomePolitico = politico.name.toLowerCase().includes(cerca.toLowerCase())
+      const biografiaPolitico = politico.biography.toLowerCase().includes(cerca.toLowerCase())
+      return nomePolitico || biografiaPolitico
+    })
+  })
+
   return (
     <>
       <div className="container">
         <h1>Lista Politici</h1>
+        <input
+          type="text"
+          placeholder="Cerca Politico per nome o biografia"
+          value={cerca}
+          onChange={e => setCerca(e.target.value)}
+        />
         <div className="lista-politici">
-          {politici.map(politico => {
+          {politiciFiltrati.map(politico => {
             return (
 
               <div className="card-politici" key={politico.id}>
