@@ -17,7 +17,8 @@ const PoliticoCard = React.memo(({ name, image, position, biography }) => {
 
 function App() {
   const [politici, setPolitici] = useState([]);
-  const [cerca, setCerca] = useState("")
+  const [cerca, setCerca] = useState("");
+  const [selezionaPosizione, setSelezionaPosizione] = useState("")
 
   useEffect(() => {
     fetch("http://localhost:3333/politicians")
@@ -26,14 +27,37 @@ function App() {
       .catch(error => console.error(error))
   }, [])
 
+  const posizionePolitico = useMemo(() => {
+    return politici.reduce((acc, politico) => {
+      if (!acc.includes(politico.position)) {
+        return [...acc, politico.position]
+      }
+      return acc;
+    }, [])
+
+  }, [politici])
+
+  /*
+  const posizionePolitico = useMemo(() => {
+    const PosizioneUnica = []
+    politici.forEach(p => {
+      if (!PosizioneUnica.includes(p.position)) {
+        PosizioneUnica.push(p.position)
+      }
+    })
+    return PosizioneUnica
+  }, [politici])
+  */
 
   const politiciFiltrati = useMemo(() => {
     return politici.filter(politico => {
       const nomePolitico = politico.name?.toLowerCase().includes(cerca.toLowerCase())
       const biografiaPolitico = politico.biography?.toLowerCase().includes(cerca.toLowerCase())
-      return nomePolitico || biografiaPolitico
+      const posizioneValida = selezionaPosizione === '' || selezionaPosizione
+        === politico.position
+      return (nomePolitico || biografiaPolitico) && posizioneValida
     })
-  }, [politici, cerca])
+  }, [politici, cerca, selezionaPosizione])
 
   return (
     <>
@@ -45,6 +69,12 @@ function App() {
           value={cerca}
           onChange={e => setCerca(e.target.value)}
         />
+        <select value={selezionaPosizione} onChange={e => setSelezionaPosizione(e.target.value)} >
+          <option value="">Cerca per Posizione</option>
+          {posizionePolitico.map((position, index) => (
+            <option key={index} value={position}>{position}</option>
+          ))}
+        </select>
         <div className="lista-politici">
           {politiciFiltrati.map(politico => (
             <PoliticoCard key={politico.id} {...politico} />
