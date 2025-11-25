@@ -1,4 +1,19 @@
-import { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo } from "react"
+
+const PoliticoCard = React.memo(({ name, image, position, biography }) => {
+  console.log("card")
+  return (
+
+    <div className="card-politici" >
+      <img src={image} alt={name} />
+      <h3>{name}</h3>
+      <p><strong>Posizione: {position}</strong></p>
+      <p>{biography}</p>
+    </div>
+  )
+})
+
+//const MemoPoliticoCard = React.memo(PoliticoCard);
 
 function App() {
   const [politici, setPolitici] = useState([]);
@@ -14,11 +29,11 @@ function App() {
 
   const politiciFiltrati = useMemo(() => {
     return politici.filter(politico => {
-      const nomePolitico = politico.name.toLowerCase().includes(cerca.toLowerCase())
-      const biografiaPolitico = politico.biography.toLowerCase().includes(cerca.toLowerCase())
+      const nomePolitico = politico.name?.toLowerCase().includes(cerca.toLowerCase())
+      const biografiaPolitico = politico.biography?.toLowerCase().includes(cerca.toLowerCase())
       return nomePolitico || biografiaPolitico
     })
-  })
+  }, [politici, cerca])
 
   return (
     <>
@@ -31,20 +46,9 @@ function App() {
           onChange={e => setCerca(e.target.value)}
         />
         <div className="lista-politici">
-          {politiciFiltrati.map(politico => {
-            return (
-
-              <div className="card-politici" key={politico.id}>
-                <img src={politico.image} alt={politico.name} />
-                <h3>{politico.name}</h3>
-                <p><strong>Posizione:{politico.position}</strong></p>
-                <p>{politico.biography}</p>
-              </div>
-
-
-            )
-
-          })}
+          {politiciFiltrati.map(politico => (
+            <PoliticoCard key={politico.id} {...politico} />
+          ))}
         </div>
       </div>
     </>
